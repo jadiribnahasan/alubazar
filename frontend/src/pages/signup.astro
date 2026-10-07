@@ -1,0 +1,106 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="নতুন অ্যাকাউন্ট — হিসাব খাতা">
+  <div class="wrap">
+    <a class="back" href="/">← ফিরে যান</a>
+
+    <div class="card">
+      <header><h2>নতুন অ্যাকাউন্ট খুলুন</h2></header>
+      <div class="body">
+        <p class="muted" style="margin-top: 0">
+          আপনার দোকানের জন্য আলাদা হিসাব ও মজুত তৈরি হবে। পণ্যের তালিকা সবার জন্য একই থাকবে।
+        </p>
+
+        <form id="signupForm" novalidate>
+          <label class="fld">
+            <span>দোকানের নাম</span>
+            <input id="suCompany" class="field" placeholder="যেমন: রহমান স্টোর" required />
+          </label>
+
+          <label class="fld">
+            <span>আপনার নাম</span>
+            <input id="suName" class="field" placeholder="যেমন: রহমান মিয়া" />
+          </label>
+
+          <label class="fld">
+            <span>লগইন</span>
+            <input id="suLogin" class="field" placeholder="english বা সংখ্যা" autocomplete="username" required />
+          </label>
+
+          <label class="fld">
+            <span>পাসওয়ার্ড</span>
+            <input id="suPass" class="field" type="password" placeholder="কমপক্ষে ৬ অক্ষর" autocomplete="new-password" required />
+          </label>
+
+          <button id="suBtn" class="btn block" type="submit">অ্যাকাউন্ট খুলুন</button>
+          <p id="suMsg" class="msg" role="alert"></p>
+        </form>
+      </div>
+    </div>
+
+    <p class="alt">আগে থেকেই অ্যাকাউন্ট আছে? <a href="/login">লগইন করুন</a></p>
+  </div>
+</Layout>
+
+<script>
+  import { signup } from '../lib/signup';
+  import { connect } from '../lib/odoo';
+  import { adoptOwner } from '../lib/session';
+
+  const msg = document.getElementById('suMsg') as HTMLElement;
+  const btn = document.getElementById('suBtn') as HTMLButtonElement;
+
+  document.getElementById('signupForm')!.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = '';
+    msg.className = 'msg';
+
+    const company = (document.getElementById('suCompany') as HTMLInputElement).value.trim();
+    const name = (document.getElementById('suName') as HTMLInputElement).value.trim();
+    const login = (document.getElementById('suLogin') as HTMLInputElement).value.trim().toLowerCase();
+    const password = (document.getElementById('suPass') as HTMLInputElement).value;
+
+    if (!company) return void (msg.textContent = 'দোকানের নাম লিখুন', msg.classList.add('err'));
+    if (!/^[a-zA-Z0-9._-]{3,60}$/.test(login)) {
+      return void (msg.textContent = 'লগইনে ৩-৬০টি অক্ষর, সংখ্যা, . _ - ব্যবহার করুন', msg.classList.add('err'));
+    }
+    if (password.length < 6) {
+      return void (msg.textContent = 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হবে', msg.classList.add('err'));
+    }
+
+    btn.disabled = true;
+    btn.classList.add('is-busy');
+    const original = btn.textContent;
+    btn.textContent = 'তৈরি হচ্ছে...';
+
+    try {
+      // Odoo's language list has bn_IN; there is no bn_BD. An unknown code makes
+      // env.lang raise on every later request, so the server validates this too.
+      await signup({ company_name: company, name, login, password, lang: 'bn_IN' });
+      await connect(login, password);
+      await adoptOwner(login);
+      msg.textContent = 'অ্যাকাউন্ট তৈরি হয়েছে';
+      msg.classList.add('ok');
+      location.replace('/app');
+    } catch (err) {
+      msg.textContent = err instanceof Error ? err.message : 'অ্যাকাউন্ট তৈরি হয়নি';
+      msg.classList.add('err');
+      btn.disabled = false;
+      btn.classList.remove('is-busy');
+      btn.textContent = original;
+    }
+  });
+</script>
+
+<style>
+  .wrap { max-width: 420px; margin: 0 auto; padding: 20px 16px 40px; }
+  .back { display: inline-block; margin-bottom: 14px; color: var(--muted); font-size: .88rem; text-decoration: none; }
+  .fld { display: block; margin-bottom: 12px; }
+  .fld > span { display: block; font-size: .78rem; font-weight: 600; color: var(--text-2); margin-bottom: 5px; }
+  .msg { min-height: 1.3em; margin: 12px 0 0; font-size: .86rem; text-align: center; }
+  .msg.err { color: var(--danger); }
+  .msg.ok { color: var(--ok); }
+  .alt { margin-top: 16px; text-align: center; font-size: .86rem; color: var(--muted); }
+  .alt a { color: var(--brand-dark); font-weight: 600; }
+</style>

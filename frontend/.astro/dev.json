@@ -1,0 +1,28 @@
+{
+	"pid": 135692,
+	"port": 4322,
+	"url": "http://localhost:4322",
+	"urls": {
+		"local": [
+			"http://localhost:4322/"
+		],
+		"network": [
+			"http://192.168.179.86:4322/",
+			"http://172.16.223.29:4322/",
+			"http://172.20.0.1:4322/",
+			"http://172.19.0.1:4322/",
+			"http://172.18.0.1:4322/",
+			"http://172.21.0.1:4322/"
+		],
+		"networkInterfaceNames": [
+			"enp1s0",
+			"wlp2s0",
+			"br-6c18339685e8",
+			"br-80f4f3ba176c",
+			"br-acaf9275c521",
+			"br-34c1a35f9e3f"
+		]
+	},
+	"background": false,
+	"startedAt": "2026-10-06T08:00:23.890Z"
+}

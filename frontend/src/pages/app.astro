@@ -1,0 +1,547 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout>
+  <!-- ============ connect ============ -->
+  <div id="connectView" class="connect-wrap" hidden>
+    <form id="connectForm" class="card connect-card">
+      <div class="body">
+        <div class="logo">হ</div>
+        <h1>হিসাব খাতা</h1>
+        <p class="sub">আপনার দোকানের লগইন দিন।<br />পণ্য সবার জন্য একই, হিসাব ও মজুত শুধু আপনার।</p>
+        <div class="row">
+          <input id="login" name="login" class="field" placeholder="লগইন" autocomplete="username" required />
+        </div>
+        <div class="row">
+          <input id="password" name="password" class="field" type="password" placeholder="পাসওয়ার্ড" autocomplete="current-password" required />
+        </div>
+        <button class="btn block" type="submit">চালু করুন</button>
+        <p id="connectStatus" class="muted" role="alert"></p>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============ app ============ -->
+  <div id="app" class="shell" hidden>
+    <header class="topbar" id="topbar">
+      <button id="brandBtn" class="brand" type="button" title="প্রতিষ্ঠানের তথ্য" aria-label="প্রতিষ্ঠানের তথ্য">
+        <span class="brand-mark" id="brandMark" aria-hidden="true">হ</span>
+        <b id="companyName">দোকানের নাম</b>
+      </button>
+      <button id="dashBtn" class="icon-btn" type="button" title="ড্যাশবোর্ড" aria-label="ড্যাশবোর্ড">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3" y="3" width="7" height="9" rx="1.5" />
+          <rect x="14" y="3" width="7" height="5" rx="1.5" />
+          <rect x="14" y="12" width="7" height="9" rx="1.5" />
+          <rect x="3" y="16" width="7" height="5" rx="1.5" />
+        </svg>
+      </button>
+      <button id="syncPill" class="pill" type="button" title="এখনই সিঙ্ক" aria-label="এখনই সিঙ্ক">
+        <span class="dot"></span><span id="syncText">অপেক্ষমাণ</span>
+      </button>
+      <button id="syncBtn" class="icon-btn" title="এখনই সিঙ্ক" aria-label="এখনই সিঙ্ক">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+          <polyline points="21 3 21 9 15 9" />
+        </svg>
+      </button>
+      <button id="logoutBtn" class="icon-btn" title="লগআউট" aria-label="লগআউট">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M18.36 6.64a9 9 0 1 1-12.72 0" />
+          <polyline points="12 2 12 12" />
+        </svg>
+      </button>
+    </header>
+
+    <div id="issueBar" class="issue-bar" hidden>
+      <div class="issue-text">
+        <b id="issueTitle">সমস্যা</b>
+        <span id="syncError" class="muted"></span>
+      </div>
+      <button id="clearFailed" class="btn subtle" type="button">মুছে ফেলুন</button>
+    </div>
+
+    <nav class="tabs" role="tablist">
+      <span class="tab-thumb" id="tabThumb" aria-hidden="true"></span>
+      <button class="tab" role="tab" data-tab="sale" aria-selected="true">বিক্রি</button>
+      <button class="tab" role="tab" data-tab="stock" aria-selected="false">মজুত</button>
+      <button class="tab" role="tab" data-tab="products" aria-selected="false">পণ্য</button>
+      <button class="tab" role="tab" data-tab="history" aria-selected="false">ইতিহাস</button>
+      <button class="tab" role="tab" data-tab="profile" aria-selected="false">প্রতিষ্ঠান</button>
+    </nav>
+
+    <!-- ---------- বিক্রি ---------- -->
+    <section class="panel panel-sale" data-panel="sale" role="tabpanel">
+      <div class="stats">
+        <div class="stat"><b id="statToday">৳ ০</b><span>আজ বিক্রয়</span></div>
+        <div class="stat"><b id="statCount">০</b><span>ইনভয়েস</span></div>
+        <div class="stat"><b id="statLow">০</b><span>কম মজুত</span></div>
+      </div>
+
+      <div class="searchbar">
+        <input id="saleSearch" class="field" type="search" placeholder="পণ্য খুঁজুন বা বারের নাম..." autocomplete="off" enterkeyhint="done" />
+      </div>
+
+      <div class="section-label recent-label" id="recentLabel" hidden>সাম্প্রতিক</div>
+      <div id="recentGrid" class="grid" hidden></div>
+
+      <div class="section-label" id="allLabel">সব পণ্য</div>
+      <div id="saleGrid" class="grid"></div>
+
+      <div class="sticky-bar">
+        <button id="openCart" class="cart-peek" type="button">
+          <span class="peek-count" id="cartCount">০</span>
+          <span class="peek-text">
+            <b id="cartTotal">৳ ০</b>
+            <span>বিল দেখুন</span>
+          </span>
+        </button>
+        <button id="saveInvoice" class="btn" type="button">সংরক্ষণ</button>
+      </div>
+    </section>
+
+    <!-- ---------- মজুত ---------- -->
+    <section class="panel" data-panel="stock" role="tabpanel" hidden>
+      <div class="card">
+        <header><h2>একসাথে ঠিক করুন</h2></header>
+        <div class="body">
+          <div class="row" style="margin-bottom: 8px">
+            <select id="stockProduct" class="field"></select>
+            <input id="stockQty" class="field" type="number" step="0.01" min="0" inputmode="decimal" placeholder="পরিমাণ" />
+          </div>
+          <button id="stockSet" class="btn block" type="button">মজুত সেট করুন</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <header>
+          <h2>সব পণ্যের মজুত</h2>
+          <span class="spacer"></span>
+          <input id="stockSearch" class="field" type="search" placeholder="খুঁজুন..." style="max-width: 150px; min-height: 36px" />
+        </header>
+        <div id="stockList" class="list"></div>
+      </div>
+    </section>
+
+    <!-- ---------- পণ্য ---------- -->
+    <section class="panel" data-panel="products" role="tabpanel" hidden>
+      <div class="card">
+        <header><h2>নতুন পণ্য</h2></header>
+        <div class="body">
+          <div class="row" style="margin-bottom: 8px">
+            <input id="productName" class="field" placeholder="পণ্যের নাম" />
+            <input id="productPrice" class="field" type="number" step="0.01" min="0" inputmode="decimal" placeholder="মূল্য" />
+          </div>
+
+          <div class="new-product-pick">
+            <div id="productPickPreview" class="product-pick-preview" aria-live="polite"><span class="ph">ছবি</span></div>
+            <div class="product-pick-actions">
+              <label class="btn subtle block">
+                ছবি তুলুন
+                <input id="productCamera" type="file" accept="image/*" capture="environment" hidden />
+              </label>
+              <label class="btn subtle block">
+                গ্যালারি থেকে
+                <input id="productImage" type="file" accept="image/*" hidden />
+              </label>
+              <button id="productImageClear" class="btn subtle block" type="button" hidden>ছবি বাদ দিন</button>
+            </div>
+          </div>
+
+          <button id="productAdd" class="btn block" type="button">যোগ করুন</button>
+          <p class="muted" style="margin: 10px 0 0; font-size: .8rem">যে পণ্য যোগ করবেন সবাই তা দেখতে পাবেন।</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <header>
+          <h2>পণ্যের তালিকা</h2>
+          <span class="spacer"></span>
+          <input id="productSearch" class="field" type="search" placeholder="খুঁজুন..." style="max-width: 150px; min-height: 36px" />
+        </header>
+        <div id="productList" class="list"></div>
+      </div>
+    </section>
+
+    <!-- ---------- ইতিহাস ---------- -->
+    <section class="panel" data-panel="history" role="tabpanel" hidden>
+      <div class="card">
+        <header><h2>ইনভয়েস ইতিহাস</h2></header>
+        <div id="invoiceList" class="list"></div>
+      </div>
+    </section>
+
+    <!-- ---------- প্রতিষ্ঠান ---------- -->
+    <section class="panel" data-panel="profile" role="tabpanel" hidden>
+      <div class="card">
+        <header><h2>লোগো</h2></header>
+        <div class="body">
+          <div class="profile-logo">
+            <div id="profileLogoPreview" class="profile-logo-preview" aria-live="polite"><span class="ph">দোকান</span></div>
+            <div class="profile-logo-actions">
+              <label class="btn subtle block">
+                লোগো বেছে নিন
+                <input id="profileLogo" type="file" accept="image/*" hidden />
+              </label>
+              <button id="profileLogoClear" class="btn subtle block" type="button">লোগো মুছুন</button>
+              <p class="muted" style="margin: 0; font-size: .78rem">ইনভয়েসের উপরে বড় করে দেখানো হবে।</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <header><h2>চেহারা</h2></header>
+        <div class="body theme-fields">
+          <span class="pf-legend">রঙ</span>
+          <div id="themeSwatches" class="theme-swatches" role="radiogroup" aria-label="রঙের প্যালেট"></div>
+
+          <span class="pf-legend">রাতের রঙ</span>
+          <div class="mode-switch" role="radiogroup" aria-label="রাতের রঙ">
+            <button class="mode-btn" type="button" role="radio" data-mode="light" aria-checked="true">সাদা</button>
+            <button class="mode-btn" type="button" role="radio" data-mode="dark" aria-checked="false">অন্ধকার</button>
+            <button class="mode-btn" type="button" role="radio" data-mode="system" aria-checked="false">ফোন অনুসরণ</button>
+          </div>
+          <p class="muted theme-hint">ইনভয়েসের কাগজ সবসময় সাদা থাকবে।</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <header><h2>প্রতিষ্ঠানের তথ্য</h2></header>
+        <div class="body profile-fields">
+          <label class="pf">
+            <span>কোম্পানির নাম</span>
+            <input id="pfCompanyName" class="field" placeholder="যেমন: রহমান ট্রেডার্স" maxlength="120" />
+          </label>
+          <label class="pf">
+            <span>ট্যাগলাইন / মোটো</span>
+            <input id="pfTagline" class="field" placeholder="যেমন: সেরা দামে সেরা পণ্য" maxlength="200" />
+          </label>
+
+          <div class="row">
+            <label class="pf">
+              <span>মোবাইল</span>
+              <input id="pfMobile" class="field" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" />
+            </label>
+            <label class="pf">
+              <span>ফোন</span>
+              <input id="pfPhone" class="field" type="tel" inputmode="tel" placeholder="ঐচ্ছিক" />
+            </label>
+          </div>
+
+          <div class="row">
+            <label class="pf">
+              <span>ইমেইল</span>
+              <input id="pfEmail" class="field" type="email" inputmode="email" placeholder="ঐচ্ছিক" />
+            </label>
+            <label class="pf">
+              <span>ওয়েবসাইট</span>
+              <input id="pfWebsite" class="field" type="url" placeholder="ঐচ্ছিক" />
+            </label>
+          </div>
+
+          <label class="pf">
+            <span>ঠিকানা</span>
+            <input id="pfStreet" class="field" placeholder="বাসা / রোড / এলাকা" />
+          </label>
+          <label class="pf">
+            <span>ঠিকানা (লাইন ২)</span>
+            <input id="pfStreet2" class="field" placeholder="ঐচ্ছিক" />
+          </label>
+
+          <div class="row">
+            <label class="pf">
+              <span>শহর</span>
+              <input id="pfCity" class="field" placeholder="ঢাকা" />
+            </label>
+            <label class="pf">
+              <span>পোস্ট কোড</span>
+              <input id="pfZip" class="field" inputmode="numeric" placeholder="ঐচ্ছিক" />
+            </label>
+          </div>
+
+          <div class="row">
+            <label class="pf">
+              <span>ট্যাক্স আইডি</span>
+              <input id="pfVat" class="field" placeholder="ঐচ্ছিক" />
+            </label>
+            <label class="pf">
+              <span>রেজিস্ট্রেশন নং</span>
+              <input id="pfRegistry" class="field" placeholder="ঐচ্ছিক" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <header><h2>ইনভয়েসের নিচে যা লেখা থাকবে</h2></header>
+        <div class="body profile-fields">
+          <label class="pf">
+            <span>শর্তাবলী</span>
+            <textarea id="pfTerms" class="field" rows="3" placeholder="যেমন: পণ্য ফেরত নেওয়া হয় না।"></textarea>
+          </label>
+          <label class="pf">
+            <span>নিচের নোট</span>
+            <textarea id="pfNote" class="field" rows="2" placeholder="যেমন: আপনার সহযোগিতার জন্য ধন্যবাদ।"></textarea>
+          </label>
+
+          <div class="row">
+            <label class="pf">
+              <span>বিক্রেতার লেবেল</span>
+              <input id="pfSellerLabel" class="field" maxlength="60" />
+            </label>
+            <label class="pf">
+              <span>ক্রেতার লেবেল</span>
+              <input id="pfBuyerLabel" class="field" maxlength="60" />
+            </label>
+          </div>
+
+          <label class="pf-check">
+            <input id="pfShowLogo" type="checkbox" />
+            <span>ইনভয়েসে লোগো দেখান</span>
+          </label>
+          <label class="pf-check">
+            <input id="pfShowSignature" type="checkbox" />
+            <span>ইনভয়েসে স্বাক্ষর ব্লক দেখান</span>
+          </label>
+          <label class="pf-check">
+            <input id="pfShowTerms" type="checkbox" />
+            <span>ইনভয়েসে শর্তাবলী দেখান</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="body">
+          <button id="profileSave" class="btn block" type="button">সংরক্ষণ করুন</button>
+          <p id="profileStatus" class="muted" style="margin: 10px 0 0; font-size: .8rem"></p>
+        </div>
+      </div>
+
+      <p class="muted" style="padding: 0 4px; font-size: .8rem">
+        এই তথ্যগুলো ইনভয়েসের পিডিএফ ও প্রিন্টে দেখানো হয়। সংরক্ষণ করলে অনলাইনে থাকলে সার্ভারে পাঠানো হয়।
+      </p>
+    </section>
+
+    <div id="printArea" class="print-only print-area"></div>
+
+    <!-- ============ dashboard ============ -->
+    <section id="dashboard" class="detail" hidden aria-labelledby="dashTitle">
+      <header class="detail-head">
+        <button id="dashBack" class="icon-btn dark" type="button" aria-label="ফিরে যান">←</button>
+        <h2 id="dashTitle">ড্যাশবোর্ড</h2>
+        <span id="dashShop" class="muted"></span>
+      </header>
+
+      <div class="detail-body">
+        <div class="dash-grid">
+          <div class="dash-tile">
+            <span class="dash-tile-label">আজ বিক্রয়</span>
+            <b class="dash-tile-value" id="dashTodayTotal">৳০</b>
+            <span class="dash-tile-sub" id="dashTodayCount">০টি বিল</span>
+          </div>
+          <div class="dash-tile">
+            <span class="dash-tile-label">আজ পরিশোধ</span>
+            <b class="dash-tile-value" id="dashTodayPaid">৳০</b>
+            <span class="dash-tile-sub" id="dashTodayPaidCount">০টি পরিশোধ</span>
+          </div>
+          <div class="dash-tile">
+            <span class="dash-tile-label">বাকি আছে</span>
+            <b class="dash-tile-value warn" id="dashDueTotal">৳০</b>
+            <span class="dash-tile-sub" id="dashDueCount">০টি ইনভয়েস</span>
+          </div>
+          <div class="dash-tile">
+            <span class="dash-tile-label">স্টক সতর্কতা</span>
+            <b class="dash-tile-value" id="dashLowStock">০</b>
+            <span class="dash-tile-sub" id="dashOutStock">০টি ফুরিয়ে গেছে</span>
+          </div>
+        </div>
+
+        <section class="dash-block">
+          <h3>সাপ্তাহিক বিক্রয়</h3>
+          <div id="dashChart" class="dash-chart"></div>
+        </section>
+
+        <section class="dash-block">
+          <h3>কার কত বাকি</h3>
+          <div id="dashDebtors" class="dash-list"></div>
+        </section>
+
+        <section class="dash-block">
+          <h3>কম মজুত পণ্য</h3>
+          <div id="dashLowItems" class="dash-list"></div>
+        </section>
+
+        <section class="dash-block">
+          <h3>সাম্প্রতিক বিল</h3>
+          <div id="dashRecent" class="dash-list"></div>
+        </section>
+
+        <p id="dashSync" class="dash-sync muted"></p>
+      </div>
+    </section>
+
+    <!-- ============ product detail ============ -->
+    <section id="productDetail" class="detail" hidden aria-labelledby="detailName">
+      <header class="detail-head">
+        <button id="detailBack" class="icon-btn dark" type="button" aria-label="ফিরে যান">←</button>
+        <h2 id="detailName">পণ্য</h2>
+      </header>
+
+      <div class="detail-body">
+        <div class="detail-hero">
+          <div id="detailThumb" class="detail-thumb"></div>
+          <div class="detail-hero-actions">
+            <label class="btn subtle block">
+              ছবি তুলুন
+              <input id="detailCamera" type="file" accept="image/*" capture="environment" hidden />
+            </label>
+            <label class="btn subtle block">
+              গ্যালারি থেকে
+              <input id="detailImage" type="file" accept="image/*" hidden />
+            </label>
+            <button id="detailImageClear" class="btn subtle block" type="button">ছবি মুছুন</button>
+          </div>
+        </div>
+
+        <div class="detail-price">
+          <label class="price-field">
+            <span>বিক্রয় মূল্য</span>
+            <input id="detailPrice" class="detail-price-input" type="number" step="0.01" min="0" inputmode="decimal" />
+          </label>
+          <button id="detailPriceSave" class="btn" type="button">সংরক্ষণ</button>
+        </div>
+
+        <div class="detail-stock">
+          <span class="section-label">বর্তমান মজুত</span>
+          <b id="detailQty">০</b>
+          <span id="detailStockHint" class="muted"></span>
+          <div class="detail-quick">
+            <button class="btn subtle" data-dq="1" type="button">+ ১</button>
+            <button class="btn subtle" data-dq="5" type="button">+ ৫</button>
+            <button class="btn subtle" data-dq="-1" type="button">− ১</button>
+            <button class="btn subtle" data-dq="-5" type="button">− ৫</button>
+          </div>
+          <div class="row">
+            <input id="detailQtyInput" class="field" type="number" step="0.01" min="0" inputmode="decimal" placeholder="নির্দিষ্ট পরিমাণ" />
+            <button id="detailQtySet" class="btn" type="button">সেট করুন</button>
+          </div>
+        </div>
+
+        <div class="detail-meta">
+          <div><span>কোড</span><b id="detailSku">—</b></div>
+          <div><span>সার্ভার আইডি</span><b id="detailOdoo">—</b></div>
+          <div><span>ক্যাটালগ</span><b>সবার জন্য</b></div>
+        </div>
+
+        <div class="card">
+          <header><h2>সাম্প্রতিক বিক্রয়</h2></header>
+          <div id="detailSales" class="list"></div>
+        </div>
+
+        <button id="detailDelete" class="btn danger block" type="button">পণ্যটি মুছে ফেলুন</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ cart sheet ============ -->
+  <div id="cartSheet" class="backdrop" hidden>
+    <div class="sheet sheet-tall" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+      <div class="sheet-head">
+        <div class="sheet-head-titles">
+          <h3 id="cartTitle">বিল</h3>
+          <span id="cartCountBadge" class="sheet-count">এখনো কোনো পণ্য নেই</span>
+        </div>
+        <button id="closeCart" class="icon-btn dark" type="button" aria-label="বন্ধ">✕</button>
+      </div>
+
+      <div class="cust">
+        <div class="cust-row">
+          <input id="customerName" class="field cust-field" placeholder="গ্রাহকের নাম (ঐচ্ছিক)" autocomplete="name" />
+          <input id="customerUuid" type="hidden" />
+          <input id="customerPhone" class="field cust-field cust-field-phone" placeholder="মোবাইল" inputmode="tel" autocomplete="tel" />
+        </div>
+        <div id="customerChips" class="chips scroll-x"></div>
+      </div>
+
+      <div id="cartList" class="list cart-list"></div>
+
+      <div class="sheet-foot">
+        <div class="foot-total">
+          <span id="footCount">০টি পণ্য</span>
+          <b id="cartTotalSheet">৳ ০</b>
+        </div>
+
+        <label class="paid-field">
+          <span>এখনই পরিশোধ</span>
+          <input id="cartPaid" class="field" type="number" step="0.01" min="0" inputmode="decimal" placeholder="০" />
+        </label>
+        <p id="cartDueHint" class="muted" hidden></p>
+
+        <div class="foot-actions">
+          <button id="clearCart" class="btn subtle" type="button">খালি</button>
+          <button id="saveInvoiceSheet" class="btn" type="button">ইনভয়েস সংরক্ষণ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ number sheet ============ -->
+  <div id="backdrop" class="backdrop" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <h3 id="sheetTitle">শিরোনাম</h3>
+      <p id="sheetHint" class="hint"></p>
+      <input id="sheetInput" class="field" type="number" step="0.01" inputmode="decimal" />
+      <div class="actions">
+        <button id="sheetCancel" class="btn subtle" type="button">বাতিল</button>
+        <button id="sheetOk" class="btn" type="button">ঠিক আছে</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ payment sheet ============ -->
+  <div id="paymentSheet" class="backdrop" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+      <div class="sheet-head">
+        <div class="sheet-head-titles">
+          <h3 id="payTitle">পেমেন্ট</h3>
+          <span id="paySubtitle" class="sheet-count"></span>
+        </div>
+        <button id="closePayment" class="icon-btn dark" type="button" aria-label="বন্ধ">✕</button>
+      </div>
+
+      <div class="pay-summary">
+        <div><span>মোট</span><b id="payTotal">৳ ০</b></div>
+        <div><span>পরিশোধিত</span><b id="payDone">৳ ০</b></div>
+        <div class="pay-due"><span>বাকি</span><b id="payLeft">৳ ০</b></div>
+      </div>
+
+      <label class="paid-field">
+        <span>এখন পরিশোধের অঙ্ক</span>
+        <input id="payAmount" class="field" type="number" step="0.01" min="0" inputmode="decimal" placeholder="০" />
+      </label>
+      <div class="row" style="margin-bottom: 12px">
+        <button class="btn subtle sm" data-payfill="due" type="button">পুরো বাকি</button>
+        <button class="btn subtle sm" data-payfill="half" type="button">অর্ধেক</button>
+      </div>
+
+      <p id="payStatus" class="muted" role="alert" style="font-size: .8rem"></p>
+      <div class="actions">
+        <button id="payCancel" class="btn subtle" type="button">বাতিল</button>
+        <button id="paySave" class="btn" type="button">পেমেন্ট সংরক্ষণ</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+</Layout>
+
+<script>
+  import { getSettings } from '../lib/settings';
+
+  if (!getSettings().password) location.replace('/login');
+</script>
+
+<script>
+  import '../scripts/app.ts';
+</script>

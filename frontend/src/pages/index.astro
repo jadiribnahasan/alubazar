@@ -1,0 +1,117 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="হিসাব খাতা — সহজ ইনভয়েস ও মজুত">
+  <div class="wrap">
+    <header class="lp-top">
+      <span class="lp-logo">হ</span>
+      <b>হিসাব খাতা</b>
+      <span class="spacer"></span>
+      <a class="btn subtle" href="/login">লগইন</a>
+    </header>
+
+    <section class="hero">
+      <h1>দোকানের হিসাব, এখন আরও সহজ</h1>
+      <p class="lede">
+        বিল তৈরি করুন, মজুত রাখুন, অফলাইনেও কাজ করুন। ইন্টারনেট চলে গেলেও
+        হিসাব থেমে যাবে না — অনলাইনে ফিরে এলেই সব সিঙ্ক হয়ে যাবে।
+      </p>
+      <div class="cta">
+        <a class="btn big" href="/signup">ফ্রি অ্যাকাউন্ট খুলুন</a>
+        <a class="btn ghost big" href="/login">আগে থেকেই অ্যাকাউন্ট আছে</a>
+      </div>
+      <p class="note">ফ্রি · কার্ড লাগে না · ২ মিনিটে শুরু</p>
+    </section>
+
+    <section class="feat">
+      <article>
+        <span class="ico">🧾</span>
+        <h3>দ্রুত বিল</h3>
+        <p>পণ্যের নাম ছুঁলেই বিলে যোগ হয়। দাম আর পরিমাণ সরাসরি বদলাতে পারবেন।</p>
+      </article>
+      <article>
+        <span class="ico">📦</span>
+        <h3>মজুত সহজ</h3>
+        <p>এক টাচেই মজুত বাড়ান বা কমান। কম মজুত সামনেই দেখায়।</p>
+      </article>
+      <article>
+        <span class="ico">📶</span>
+        <h3>অফলাইন কাজ</h3>
+        <p>ইন্টারনেট ছাড়াই বিল তৈরি করুন। পরে নিজে থেকেই সিঙ্ক হবে।</p>
+      </article>
+      <article>
+        <span class="ico">🤝</span>
+        <h3>সবার পণ্য</h3>
+        <p>যে পণ্য কেউ যোগ করবে সবাই পাবেন। নিজের মজুত আলাদা থাকবে।</p>
+      </article>
+    </section>
+
+    <section class="steps">
+      <h2>তিন ধাপে শুরু</h2>
+      <ol>
+        <li><b>অ্যাকাউন্ট খুলুন</b><span>দোকানের নাম ও লগইন দিন</span></li>
+        <li><b>মজুত লিখুন</b><span>কতটি আছে সেটা একবার দিন</span></li>
+        <li><b>বিল করুন</b><span>পণ্য বেছে নিন, বিল তৈরি হয়ে গেছে</span></li>
+      </ol>
+      <a class="btn block" href="/signup">এখনই শুরু করুন</a>
+    </section>
+
+    <footer class="lp-foot">
+      <p>প্রতিটি দোকানের হিসাব আলাদা · পণ্যের তালিকা সবার</p>
+    </footer>
+  </div>
+</Layout>
+
+<script>
+  import { getSettings } from '../lib/settings';
+
+  const signedIn = Boolean(getSettings().password);
+  if (signedIn) {
+    const cta = document.querySelector('.cta');
+    if (cta) {
+      cta.innerHTML =
+        '<a class="btn big" href="/app">আমার অ্যাকাউন্টে যান</a>';
+    }
+  }
+</script>
+
+<style>
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 48px; }
+  .lp-top { display: flex; align-items: center; gap: 10px; padding: 16px 0; }
+  .lp-logo {
+    width: 34px; height: 34px; display: grid; place-items: center;
+    border-radius: 10px; background: var(--brand); color: #fff; font-weight: 700;
+  }
+  .lp-top .spacer { flex: 1; }
+  .hero { padding: 28px 0 32px; }
+  .hero h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.6px; }
+  .lede { font-size: 1rem; color: var(--text-2); line-height: 1.7; margin: 0 0 22px; max-width: 46ch; }
+  .cta { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cta .btn { flex: 1; min-width: 180px; text-align: center; }
+  .btn.big { min-height: 50px; font-size: 1rem; padding: 14px 20px; }
+  .note { margin: 12px 0 0; font-size: .82rem; color: var(--muted); }
+  .feat { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 32px; }
+  @media (min-width: 640px) { .feat { grid-template-columns: repeat(4, 1fr); } }
+  .feat article { padding: 16px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
+  .feat .ico { font-size: 1.4rem; }
+  .feat h3 { margin: 8px 0 4px; font-size: .95rem; }
+  .feat p { margin: 0; font-size: .82rem; color: var(--muted); line-height: 1.55; }
+  .steps h2 { font-size: 1.05rem; margin: 0 0 14px; }
+  .steps ol { list-style: none; padding: 0; margin: 0 0 18px; counter-reset: s; }
+  .steps li {
+    counter-increment: s; position: relative; padding: 0 0 16px 38px;
+  }
+  .steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 0;
+    width: 26px; height: 26px; display: grid; place-items: center;
+    border-radius: 50%; background: var(--brand-soft); color: var(--brand-dark);
+    font-weight: 700; font-size: .85rem;
+  }
+  .steps li:not(:last-child)::after {
+    content: ''; position: absolute; left: 13px; top: 30px; bottom: 4px; width: 2px; background: var(--line);
+  }
+  .steps li b { display: block; font-size: .95rem; }
+  .steps li span { font-size: .84rem; color: var(--muted); }
+  .lp-foot { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .lp-foot p { margin: 0; font-size: .8rem; color: var(--muted); text-align: center; }
+</style>

@@ -1,0 +1,81 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="লগইন — হিসাব খাতা">
+  <div class="wrap">
+    <a class="back" href="/">← ফিরে যান</a>
+
+    <div class="card">
+      <header><h2>লগইন করুন</h2></header>
+      <div class="body">
+        <form id="loginForm" novalidate>
+          <label class="fld">
+            <span>লগইন</span>
+            <input id="liLogin" class="field" autocomplete="username" required />
+          </label>
+          <label class="fld">
+            <span>পাসওয়ার্ড</span>
+            <input id="liPass" class="field" type="password" autocomplete="current-password" required />
+          </label>
+          <button id="liBtn" class="btn block" type="submit">প্রবেশ করুন</button>
+          <p id="liMsg" class="msg" role="alert"></p>
+        </form>
+      </div>
+    </div>
+
+    <p class="alt">নতুন দোকান? <a href="/signup">ফ্রি অ্যাকাউন্ট খুলুন</a></p>
+  </div>
+</Layout>
+
+<script>
+  import { connect } from '../lib/odoo';
+  import { getSettings } from '../lib/settings';
+  import { adoptOwner } from '../lib/session';
+
+  const saved = getSettings();
+  (document.getElementById('liLogin') as HTMLInputElement).value = saved.login;
+  (document.getElementById('liPass') as HTMLInputElement).value = saved.password;
+
+  const msg = document.getElementById('liMsg') as HTMLElement;
+  const btn = document.getElementById('liBtn') as HTMLButtonElement;
+
+  document.getElementById('loginForm')!.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = '';
+    msg.className = 'msg';
+
+    const login = (document.getElementById('liLogin') as HTMLInputElement).value.trim();
+    const password = (document.getElementById('liPass') as HTMLInputElement).value;
+    if (!login || !password) {
+      return void (msg.textContent = 'লগইন ও পাসওয়ার্ড লিখুন', msg.classList.add('err'));
+    }
+
+    btn.disabled = true;
+    btn.classList.add('is-busy');
+    const original = btn.textContent;
+    btn.textContent = 'যুক্ত হচ্ছে...';
+
+    try {
+      await connect(login, password);
+      await adoptOwner(login);
+      location.replace('/app');
+    } catch (err) {
+      msg.textContent = err instanceof Error ? err.message : 'লগইন ব্যর্থ';
+      msg.classList.add('err');
+      btn.disabled = false;
+      btn.classList.remove('is-busy');
+      btn.textContent = original;
+    }
+  });
+</script>
+
+<style>
+  .wrap { max-width: 420px; margin: 0 auto; padding: 20px 16px 40px; }
+  .back { display: inline-block; margin-bottom: 14px; color: var(--muted); font-size: .88rem; text-decoration: none; }
+  .fld { display: block; margin-bottom: 12px; }
+  .fld > span { display: block; font-size: .78rem; font-weight: 600; color: var(--text-2); margin-bottom: 5px; }
+  .msg { min-height: 1.3em; margin: 12px 0 0; font-size: .86rem; text-align: center; }
+  .msg.err { color: var(--danger); }
+  .alt { margin-top: 16px; text-align: center; font-size: .86rem; color: var(--muted); }
+  .alt a { color: var(--brand-dark); font-weight: 600; }
+</style>
